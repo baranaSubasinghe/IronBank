@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Iron Bank | Admin Console</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #1a1d21;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e0e0e0; /* Made default text brighter */
+        }
+
+        /* Navbar */
+        .navbar { background-color: #212529; border-bottom: 1px solid #2c3034; }
+        .navbar-brand { font-weight: bold; letter-spacing: 1px; color: white !important; }
+
+        /* Stats Cards */
+        .stat-card { background-color: #212529; border: 1px solid #2c3034; border-radius: 10px; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-5px); border-color: #3498db; }
+        .stat-icon { font-size: 2rem; opacity: 0.8; }
+
+        /* Table Styling */
+        .table-dark-custom {
+            background-color: #212529;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .table-dark-custom th {
+            background-color: #2c3034;
+            color: #ffffff; /* Pure white headers */
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #34495e;
+            padding: 15px;
+        }
+        .table-dark-custom td {
+            vertical-align: middle;
+            border-color: #2c3034;
+            padding: 15px;
+            color: #e0e0e0; /* Brighter table text */
+        }
+
+        /* Fix for Unreadable Text */
+        .email-text {
+            color: #adb5bd !important; /* Lighter grey for readability */
+            font-size: 0.85rem;
+        }
+        .section-header {
+            color: #ffffff !important; /* Pure white section title */
+            font-weight: bold;
+        }
+
+        /* Badges & Buttons */
+        .badge-soft-success { background-color: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+        .badge-soft-danger { background-color: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+
+        .acc-font { font-family: 'Consolas', monospace; color: #ced4da; letter-spacing: 0.5px; background: #343a40; }
+
+        /* Form inputs */
+        .input-dark { background-color: #2c3034; border: 1px solid #495057; color: white; }
+        .input-dark:focus { background-color: #343a40; color: white; border-color: #3498db; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark mb-5 py-3">
+    <div class="container">
+        <span class="navbar-brand">
+            <i class="fas fa-user-shield me-2 text-danger"></i> ADMIN <span class="text-white-50">CONSOLE</span>
+        </span>
+        <form th:action="@{/logout}" method="post" class="m-0">
+            <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="row mb-5 g-4">
+        <div class="col-md-6">
+            <div class="stat-card p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase text-light mb-1">Total Clients</h6>
+                    <h2 class="display-6 fw-bold mb-0 text-white" th:text="${users.size()}">0</h2>
+                </div>
+                <div class="stat-icon text-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-card p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase text-light mb-1">Bank Reserves</h6>
+                    <h2 class="display-6 fw-bold mb-0 text-success" th:text="${'Rs. ' + totalReserves}">Rs. 0.00</h2>
+                </div>
+                <div class="stat-icon text-success">
+                    <i class="fas fa-vault"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show bg-dark text-success border-success mb-4" role="alert">
+        <i class="fas fa-check-circle me-2"></i> Action completed successfully!
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+
+    <h5 class="mb-3 section-header"><i class="fas fa-list me-2"></i> Client Management</h5>
+
+    <div class="table-responsive table-dark-custom">
+        <table class="table table-dark table-hover mb-0">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>User Details</th>
+                <th>Account Info</th>
+                <th class="text-end">Balance</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Account Control</th>
+                <th class="text-center">Teller Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <td class="text-white-50" th:text="${'#' + user.id}">#1</td>
+
+                <td>
+                    <div class="fw-bold text-white" th:text="${user.username}">User</div>
+                    <div class="email-text" th:text="${user.email}">email@test.com</div>
+                </td>
+
+                <td>
+                        <span class="acc-font small border border-secondary px-2 py-1 rounded">
+                            <i class="fas fa-credit-card me-1 text-white-50"></i>
+                            <span th:text="${user.accountNumber}">ACC-000</span>
+                        </span>
+                </td>
+
+                <td class="text-end fw-bold text-success" th:text="${'Rs. ' + user.balance}">
+                    Rs. 5000.00
+                </td>
+
+                <td class="text-center">
+                    <span th:if="${user.active}" class="badge badge-soft-success rounded-pill px-3">ACTIVE</span>
+                    <span th:unless="${user.active}" class="badge badge-soft-danger rounded-pill px-3">FROZEN</span>
+                </td>
+
+                <td class="text-center">
+                    <form th:action="@{/admin/toggle-status/{id}(id=${user.id})}" method="post">
+                        <button type="submit" class="btn btn-sm w-100 fw-bold"
+                                th:classappend="${user.active} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                th:text="${user.active} ? '❄️ Freeze' : '🔥 Activate'">
+                        </button>
+                    </form>
+                </td>
+
+                <td>
+                    <form th:action="@{/admin/deposit}" method="post" class="d-flex gap-2 justify-content-center">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+                        <input type="number" name="amount" class="form-control form-control-sm input-dark text-center"
+                               placeholder="0.00" step="0.01" min="1" style="width: 100px;">
+                        <button type="submit" class="btn btn-primary btn-sm px-3" title="Deposit Money">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

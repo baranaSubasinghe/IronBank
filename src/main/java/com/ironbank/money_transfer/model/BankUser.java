@@ -2,32 +2,70 @@ package com.ironbank.money_transfer.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.math.BigDecimal;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-@Entity // 1. Tells Hibernate: "Make a table called 'bank_user' in MySQL"
-@Table(name = "bank_users")
-@Data // 2. Lombok: Auto-generates Getters, Setters, and toString
-public class BankUser {
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
+
+@Entity
+@Data
+public class BankUser implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment ID (1, 2, 3...)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false) // Username must be unique
+    @Column(unique = true)
     private String username;
 
-    @Column(nullable = false)
-    private BigDecimal balance; // ⚠️ ALWAYS use BigDecimal for money!
+    private String password;
 
+    private String email;
+    private String phoneNumber;
+
+    private BigDecimal balance;
     private String accountNumber;
 
-    // Constructor for easy testing
-    public BankUser(String username, BigDecimal balance, String accountNumber) {
+    private String role; // "ROLE_USER" or "ROLE_ADMIN"
+    private boolean active = true; // Default is true (Account is open)
+
+    // Empty Constructor
+    public BankUser() {}
+
+    // Constructor for Registration
+    public BankUser(String username, String password, String email, String phoneNumber, BigDecimal balance, String accountNumber, String role) {
         this.username = username;
+        this.password = password;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
         this.balance = balance;
         this.accountNumber = accountNumber;
+        this.role = role;
+        this.active = true;
     }
 
-    // Default constructor needed for JPA
-    public BankUser() {}
+    // --- Spring Security Required Methods ---
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() {
+        // 🔥 CRITICAL FIX: If active is false, Spring Security blocks login!
+        return this.active;
+    }
 }

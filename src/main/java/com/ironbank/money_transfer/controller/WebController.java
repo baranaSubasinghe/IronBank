@@ -1,77 +1,123 @@
 package com.ironbank.money_transfer.controller;
 
 import com.ironbank.money_transfer.model.BankUser;
+import com.ironbank.money_transfer.model.Transaction;
 import com.ironbank.money_transfer.repository.BankUserRepository;
-import com.ironbank.money_transfer.repository.TransactionRepository; // ⚠️ Don't forget this import!
-import com.ironbank.money_transfer.service.TransferService;
+import com.ironbank.money_transfer.repository.TransactionRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import com.ironbank.money_transfer.repository.BeneficiaryRepository;
+import com.ironbank.money_transfer.model.Beneficiary;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.ironbank.money_transfer.service.PdfService;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
-import java.math.BigDecimal;
+import java.io.ByteArrayInputStream;
+import java.security.Principal;
 import java.util.List;
 
 @Controller
 public class WebController {
 
     private final BankUserRepository repository;
-    private final TransferService transferService;
-    private final TransactionRepository transactionRepository; // 1. New Field
+    private final TransactionRepository transactionRepository;
+    private final BeneficiaryRepository beneficiaryRepository;
+    private final PdfService pdfService;
 
-    // 2. Updated Constructor to inject TransactionRepository
-    public WebController(BankUserRepository repository,
-                         TransferService transferService,
-                         TransactionRepository transactionRepository) {
+    public WebController(BankUserRepository repository, TransactionRepository transactionRepository,BeneficiaryRepository beneficiaryRepository,PdfService pdfService) {
         this.repository = repository;
-        this.transferService = transferService;
         this.transactionRepository = transactionRepository;
+        this.beneficiaryRepository = beneficiaryRepository;
+        this.pdfService = pdfService;
     }
 
+    // 🏠 Dashboard: ONLY shows Balance & History
+//    @GetMapping("/")
+//    public String home(Model model, Principal principal) {
+//        String username = principal.getName();
+//        BankUser currentUser = repository.findByUsername(username).orElseThrow();
+//
+//        // Fetch transaction history
+//        List<Transaction> myHistory = transactionRepository.findBySenderNameOrReceiverName(username, username);
+//
+//        model.addAttribute("username", username);
+//        model.addAttribute("balance", currentUser.getBalance());
+//        model.addAttribute("accountNumber", currentUser.getAccountNumber());
+//        model.addAttribute("transactions", myHistory);
+//
+//        return "dashboard";
+//    }
+
     @GetMapping("/")
-    public String home(Model model) {
-        // Fetch all users
-        List<BankUser> users = repository.findAll();
+    public String home(Model model, Principal principal) {
+        String username = principal.getName();
+        BankUser currentUser = repository.findByUsername(username).orElseThrow();
 
-        // Fetch all transactions (History)
-        var transactions = transactionRepository.findAll(); // 3. Get history
+        // 1. Get History
+        List<Transaction> myHistory = transactionRepository.findBySenderNameOrReceiverName(username, username);
 
-        // Put them in the "Model" so HTML can see them
-        model.addAttribute("users", users);
-        model.addAttribute("transactions", transactions); // 4. Send history to HTML
+        // 2. NEW: Get My Saved Contacts
+        List<Beneficiary> myContacts = beneficiaryRepository.findByUserId(currentUser.getId());
+
+        model.addAttribute("username", username);
+        model.addAttribute("balance", currentUser.getBalance());
+        model.addAttribute("accountNumber", currentUser.getAccountNumber());
+        model.addAttribute("transactions", myHistory);
+        model.addAttribute("contacts", myContacts); // Send contacts to HTML
 
         return "dashboard";
     }
 
-    @PostMapping("/sendMoney")
-    public String sendMoney(@RequestParam Long senderId,
-                            @RequestParam Long receiverId,
-                            @RequestParam BigDecimal amount,
-                            Model model) { // 1. Add 'Model' here to send data back
+    // NEW: Save a Friend
+    @PostMapping("/add-contact")
+    public String addContact(@RequestParam String name,
+                             @RequestParam String accountNumber,
+                             Principal principal) {
 
-        try {
-            // Try to move money
-            transferService.transferMoney(senderId, receiverId, amount);
+        String username = principal.getName();
+        BankUser currentUser = repository.findByUsername(username).orElseThrow();
 
-            // If successful, go back home cleanly
-            return "redirect:/";
+        // Save
+        Beneficiary contact = new Beneficiary(currentUser, name, accountNumber, "");
+        beneficiaryRepository.save(contact);
 
-        } catch (RuntimeException e) {
-            // 2. IF it fails (caught the error!), do this:
-
-            // Log it for us developers
-            System.out.println("🔴 Transfer Failed: " + e.getMessage());
-
-            // Add the error message to the Model so HTML can see it
-            model.addAttribute("errorMessage", e.getMessage());
-
-            // RELOAD the data (because we are staying on the same page)
-            model.addAttribute("users", repository.findAll());
-            model.addAttribute("transactions", transactionRepository.findAll());
-
-            // Return to the dashboard (NOT redirect) to show the error
-            return "dashboard";
-        }
+        return "redirect:/?success=Contact Added";
     }
+
+    @GetMapping("/download-receipt/{id}")
+    public ResponseEntity<InputStreamResource> downloadReceipt(@PathVariable Long id, Principal principal) {
+
+        // 1. Find the transaction
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        // 2. Security Check (Ensure the logged-in user is part of this transaction)
+        String currentUsername = principal.getName();
+        if (!transaction.getSenderName().equals(currentUsername) &&
+                !transaction.getReceiverName().equals(currentUsername)) {
+            throw new RuntimeException("Unauthorized access to receipt");
+        }
+
+        // 3. Generate PDF
+        ByteArrayInputStream pdfStream = pdfService.generateReceipt(transaction);
+
+        // 4. Return as a file download
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=receipt_" + id + ".pdf");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(pdfStream));
+    }
+    // ❌ DELETED: /sendMoney (Moved to TransferController)
+    // ❌ DELETED: /verify-otp (Moved to TransferController)
+    // ❌ DELETED: /process-otp (Moved to TransferController)
 }

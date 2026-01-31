@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Join Iron Bank</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Shared style with Login page for consistency */
+    body {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card {
+      width: 100%;
+      max-width: 450px;
+      border-radius: 15px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      border: none;
+    }
+    .btn-register {
+      background-color: #27ae60;
+      border-color: #27ae60;
+      color: white;
+      transition: 0.3s;
+    }
+    .btn-register:hover {
+      background-color: #219150;
+      border-color: #219150;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card p-4">
+  <div class="card-body">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold text-dark"><i class="fas fa-university text-secondary"></i> Join Iron Bank</h2>
+      <p class="text-muted">Create your secure account today</p>
+    </div>
+
+    <form th:action="@{/register}" method="post">
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">Username</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-user"></i></span>
+          <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">Email Address</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+          <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+        </div>
+        <div class="form-text">We'll send your OTP codes here.</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-bold">Password</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-lock"></i></span>
+          <input type="password" name="password" class="form-control" placeholder="Create a strong password" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-register w-100 py-2 fw-bold fs-5 shadow-sm">
+        Create Account <i class="fas fa-arrow-right ms-2"></i>
+      </button>
+    </form>
+
+    <div class="text-center mt-4">
+      <p class="mb-0">Already have an account?</p>
+      <a th:href="@{/login}" class="text-decoration-none fw-bold text-primary">Sign In here</a>
+    </div>
+
+    <div th:if="${param.error}" class="alert alert-danger mt-3 py-2 text-center fade show">
+      <i class="fas fa-exclamation-circle"></i> Registration failed. Try a different username.
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
