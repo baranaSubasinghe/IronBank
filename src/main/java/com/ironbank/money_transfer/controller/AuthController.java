@@ -65,6 +65,8 @@ public class AuthController {
                 "ROLE_USER"
         );
 
+        // 3. Save the User (This stays the same)
+        repository.save(newUser);
         // 3. Save & Notify
         try {
             notificationService.sendWelcomeEmail(email, username);

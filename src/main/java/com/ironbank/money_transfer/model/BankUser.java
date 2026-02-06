@@ -1,6 +1,7 @@
 package com.ironbank.money_transfer.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,7 @@ public class BankUser implements UserDetails {
     @Column(unique = true)
     private String username;
 
+    @Column(length = 1000) // <--- Add this! Forces the column to be huge.
     private String password;
 
     private String email;
