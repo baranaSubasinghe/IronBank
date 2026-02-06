@@ -21,6 +21,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable()) // <--- ADD THIS LINE (Fixes 403 Errors)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/register", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN") // 🔒 Strict Admin Check

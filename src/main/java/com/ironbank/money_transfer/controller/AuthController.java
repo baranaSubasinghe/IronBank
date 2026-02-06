@@ -42,19 +42,18 @@ public class AuthController {
     public void registerUser(@RequestParam String username,
                              @RequestParam String password,
                              @RequestParam String email,
-                             @RequestParam String phone,
-                             HttpServletResponse response) throws IOException { // <--- Added response object
+                             @RequestParam String phone, // Ensure HTML input name="phone" matches this!
+                             HttpServletResponse response) throws IOException {
 
-        System.out.println("1. Request received for: " + username);
+        System.out.println("DEBUG: Request received for " + username);
 
-        // 1. Check if user exists (Cleaned up duplicate code)
+        // 1. Check if user exists
         if (repository.findByUsername(username).isPresent()) {
-            System.out.println("2. User already exists!");
-            response.sendRedirect("/register?error"); // Force relative redirect
+            response.sendRedirect("/register?error");
             return;
         }
 
-        // 2. Create new user
+        // 2. Create User
         BankUser newUser = new BankUser(
                 username,
                 passwordEncoder.encode(password),
@@ -65,21 +64,19 @@ public class AuthController {
                 "ROLE_USER"
         );
 
-//        // 3. Save the User (This stays the same)
-//        repository.save(newUser);
-//        // 3. Save & Notify
-//        try {
-//            notificationService.sendWelcomeEmail(email, username);
-//        } catch (Exception e) {
-//            // This prints the error to the logs, but lets the code continue!
-//            System.out.println("⚠️ Warning: Email could not be sent. Error: " + e.getMessage());
-//        }
+        // 3. Save User (This commits the data)
+        repository.save(newUser);
+        System.out.println("DEBUG: User saved to database!");
 
-        // 4. Force browser to handle the redirect path relative to current URL
-        // This prevents the HTTP vs HTTPS conflict on Railway
+        // 4. THE FIX: Try to send email, but ignore errors!
+        try {
+            notificationService.sendWelcomeEmail(email, username);
+        } catch (Exception e) {
+            System.out.println("⚠️ Email failed (Ignored): " + e.getMessage());
+        }
+
+        // 5. Redirect
         response.sendRedirect("/login?success");
-
-
     }
 
 }
