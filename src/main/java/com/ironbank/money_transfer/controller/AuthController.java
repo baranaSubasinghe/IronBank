@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Controller
 public class AuthController {
@@ -27,51 +28,49 @@ public class AuthController {
         this.notificationService = notificationService;
     }
 
-    // Show the Login Page
     @GetMapping("/login")
     public String login() {
         return "login";
     }
 
-    // Show the Register Page
     @GetMapping("/register")
     public String register() {
         return "register";
     }
 
-    // Handle the Registration Form
     @PostMapping("/register")
-    public String registerUser(@RequestParam String username,
-                               @RequestParam String password,
-                               @RequestParam String email,
-                               @RequestParam String phone) {
+    public void registerUser(@RequestParam String username,
+                             @RequestParam String password,
+                             @RequestParam String email,
+                             @RequestParam String phone,
+                             HttpServletResponse response) throws IOException { // <--- Added response object
 
-        System.out.println("1. Request received for: " + username); // Debug 1
+        System.out.println("1. Request received for: " + username);
 
+        // 1. Check if user exists (Cleaned up duplicate code)
         if (repository.findByUsername(username).isPresent()) {
-            System.out.println("2. User already exists!"); // Debug 2
-            return "redirect:/register?error";
-        }
-        // Check if user exists
-        if (repository.findByUsername(username).isPresent()) {
-            return "redirect:/register?error";
+            System.out.println("2. User already exists!");
+            response.sendRedirect("/register?error"); // Force relative redirect
+            return;
         }
 
-        // Create new user with ENCRYPTED password
+        // 2. Create new user
         BankUser newUser = new BankUser(
                 username,
                 passwordEncoder.encode(password),
                 email,
-                phone,         // Phone (Make sure this is in the right spot!)
-                new BigDecimal("0.00"), // Balance
-                "ACC-" + System.currentTimeMillis(), // Account Number
-                "ROLE_USER"           // Role
-
+                phone,
+                new BigDecimal("0.00"),
+                "ACC-" + System.currentTimeMillis(),
+                "ROLE_USER"
         );
 
+        // 3. Save & Notify
         repository.save(newUser);
         notificationService.sendWelcomeEmail(email, username);
-        return "redirect:/login?success";
 
+        // 4. Force browser to handle the redirect path relative to current URL
+        // This prevents the HTTP vs HTTPS conflict on Railway
+        response.sendRedirect("/login?success");
     }
 }

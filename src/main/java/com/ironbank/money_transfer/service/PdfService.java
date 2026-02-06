@@ -37,9 +37,7 @@ public class PdfService {
             PdfWriter.getInstance(document, out);
             document.open();
 
-            // ==========================================
             // 1. HEADER (Logo + Title)
-            // ==========================================
             PdfPTable headerTable = new PdfPTable(2);
             headerTable.setWidthPercentage(100);
             headerTable.setWidths(new float[]{1, 2}); // Logo takes 1 part, Title takes 2 parts
@@ -76,9 +74,7 @@ public class PdfService {
             document.add(new Paragraph("\n"));
             document.add(new Paragraph("\n"));
 
-            // ==========================================
             // 2. TRANSACTION METADATA (Date, Time, Ref)
-            // ==========================================
             PdfPTable metaTable = new PdfPTable(2);
             metaTable.setWidthPercentage(100);
 
@@ -92,9 +88,7 @@ public class PdfService {
             document.add(metaTable);
             document.add(new Paragraph("\n"));
 
-            // ==========================================
             // 3. SENDER & RECEIVER CARD
-            // ==========================================
 
             // Fetch Users safely
             BankUser sender = userRepository.findByUsername(transaction.getSenderName()).orElse(null);
@@ -131,9 +125,7 @@ public class PdfService {
             detailsTable.addCell(receiverCell);
             document.add(detailsTable);
 
-            // ==========================================
             // 4. AMOUNT SECTION (Clean & Big)
-            // ==========================================
             document.add(new Paragraph("\n"));
 
             PdfPTable amountTable = new PdfPTable(1);
@@ -158,9 +150,7 @@ public class PdfService {
             amountTable.addCell(amountCell);
             document.add(amountTable);
 
-            // ==========================================
             // 5. FOOTER
-            // ==========================================
             document.add(new Paragraph("\n\n"));
             Paragraph footer = new Paragraph("Thank you for banking with Iron Bank.\nFor support, contact support@ironbank.com",
                     FontFactory.getFont(FontFactory.HELVETICA, 10, TEXT_GRAY));

@@ -50,7 +50,7 @@ public class TransferService {
         bankUserRepository.save(receiver);
 
         // 6. Record Transaction
-        // 🔥 FIX IS HERE: Use .getUsername() to turn the User Object into a String
+        // Used .getUsername() to turn the User Object into a String
         Transaction transaction = new Transaction(
                 sender.getUsername(),
                 receiver.getUsername(),

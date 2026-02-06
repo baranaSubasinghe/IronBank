@@ -41,7 +41,7 @@ public class AdminController {
         model.addAttribute("activeCount", activeCount);
         model.addAttribute("frozenCount", frozenCount);
 
-        return "admin"; // Matches templates/admin.html
+        return "admin";
     }
 
     @PostMapping("/toggle-status/{id}")

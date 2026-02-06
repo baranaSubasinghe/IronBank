@@ -29,8 +29,8 @@ public class BankUser implements UserDetails {
     private BigDecimal balance;
     private String accountNumber;
 
-    private String role; // "ROLE_USER" or "ROLE_ADMIN"
-    private boolean active = true; // Default is true (Account is open)
+    private String role;
+    private boolean active = true;
 
     // Empty Constructor
     public BankUser() {}
@@ -47,7 +47,7 @@ public class BankUser implements UserDetails {
         this.active = true;
     }
 
-    // --- Spring Security Required Methods ---
+    //  Spring Security Required Methods
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -65,7 +65,7 @@ public class BankUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // 🔥 CRITICAL FIX: If active is false, Spring Security blocks login!
+        //  If active is false, Spring Security blocks login!
         return this.active;
     }
 }

@@ -37,7 +37,7 @@ public class WebController {
         this.pdfService = pdfService;
     }
 
-    // 🏠 Dashboard: ONLY shows Balance & History
+    // Dashboard: ONLY shows Balance & History
 //    @GetMapping("/")
 //    public String home(Model model, Principal principal) {
 //        String username = principal.getName();
@@ -117,7 +117,5 @@ public class WebController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(new InputStreamResource(pdfStream));
     }
-    // ❌ DELETED: /sendMoney (Moved to TransferController)
-    // ❌ DELETED: /verify-otp (Moved to TransferController)
-    // ❌ DELETED: /process-otp (Moved to TransferController)
+
 }

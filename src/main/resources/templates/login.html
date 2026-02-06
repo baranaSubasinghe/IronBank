@@ -10,7 +10,9 @@
 </head>
 <body>
 <div class="card p-4">
+
     <div class="card-body text-center">
+
         <h2 class="mb-4 fw-bold text-dark">🏛️ Iron Bank</h2>
         <form th:action="@{/login}" method="post">
             <div class="mb-3 text-start">
@@ -28,7 +30,12 @@
         </div>
         <div th:if="${param.error}" class="alert alert-danger mt-3 py-2 text-center">Invalid Credentials</div>
         <div th:if="${param.logout}" class="alert alert-success mt-3 py-2 text-center">Logged out successfully</div>
+        <div class="alert alert-info mt-3 py-2 text-center" style="font-size: 0.9rem;">
+            <strong>💡 Demo Access:</strong><br>
+            User: <code>admin</code> | Pass: <code>admin</code>
+        </div>
     </div>
+
 </div>
 </body>
 </html>
