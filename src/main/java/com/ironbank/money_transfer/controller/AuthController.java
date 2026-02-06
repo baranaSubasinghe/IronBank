@@ -72,5 +72,6 @@ public class AuthController {
         repository.save(newUser);
         notificationService.sendWelcomeEmail(email, username);
         return "redirect:/login?success";
+
     }
 }
