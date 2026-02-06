@@ -65,18 +65,21 @@ public class AuthController {
                 "ROLE_USER"
         );
 
-        // 3. Save the User (This stays the same)
-        repository.save(newUser);
-        // 3. Save & Notify
-        try {
-            notificationService.sendWelcomeEmail(email, username);
-        } catch (Exception e) {
-            // This prints the error to the logs, but lets the code continue!
-            System.out.println("⚠️ Warning: Email could not be sent. Error: " + e.getMessage());
-        }
+//        // 3. Save the User (This stays the same)
+//        repository.save(newUser);
+//        // 3. Save & Notify
+//        try {
+//            notificationService.sendWelcomeEmail(email, username);
+//        } catch (Exception e) {
+//            // This prints the error to the logs, but lets the code continue!
+//            System.out.println("⚠️ Warning: Email could not be sent. Error: " + e.getMessage());
+//        }
 
         // 4. Force browser to handle the redirect path relative to current URL
         // This prevents the HTTP vs HTTPS conflict on Railway
         response.sendRedirect("/login?success");
+
+
     }
+
 }
