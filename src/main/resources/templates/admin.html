@@ -17,15 +17,7 @@
         .navbar-brand { font-weight: bold; letter-spacing: 1px; color: white !important; }
 
         /* Stats Cards */
-        .stat-card {
-            background-color: #212529;
-            border: 1px solid #2c3034;
-            border-radius: 10px;
-            transition: transform 0.2s;
-            min-height: 160px; /* Ensure cards are same height */
-        }
-        .stat-card:hover { transform: translateY(-5px); border-color: #3498db; }
-        .stat-icon { font-size: 2.5rem; opacity: 0.8; }
+        .stat-card { background-color: #212529; border: 1px solid #2c3034; border-radius: 10px; min-height: 180px; }
 
         /* Table Styling */
         .table-dark-custom {
@@ -101,7 +93,7 @@
                     <h6 class="text-uppercase text-light mb-1">Bank Reserves</h6>
                     <h2 class="display-6 fw-bold mb-0 text-success" th:text="${'Rs. ' + totalReserves}">Rs. 0.00</h2>
                 </div>
-                <div class="stat-icon text-success">
+                <div class="stat-icon text-success" style="font-size: 2.5rem; opacity: 0.8;">
                     <i class="fas fa-vault"></i>
                 </div>
             </div>
@@ -141,9 +133,7 @@
                             <span th:text="${user.accountNumber}">ACC-000</span>
                         </span>
                 </td>
-                <td class="text-end fw-bold text-success" th:text="${'Rs. ' + user.balance}">
-                    Rs. 5000.00
-                </td>
+                <td class="text-end fw-bold text-success" th:text="${'Rs. ' + user.balance}">Rs. 5000.00</td>
                 <td class="text-center">
                     <span th:if="${user.active}" class="badge badge-soft-success rounded-pill px-3">ACTIVE</span>
                     <span th:unless="${user.active}" class="badge badge-soft-danger rounded-pill px-3">FROZEN</span>
@@ -161,7 +151,7 @@
                         <input type="hidden" name="userId" th:value="${user.id}">
                         <input type="number" name="amount" class="form-control form-control-sm input-dark text-center"
                                placeholder="0.00" step="0.01" min="1" style="width: 100px;">
-                        <button type="submit" class="btn btn-primary btn-sm px-3" title="Deposit Money">
+                        <button type="submit" class="btn btn-primary btn-sm px-3">
                             <i class="fas fa-plus"></i>
                         </button>
                     </form>
@@ -197,9 +187,9 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false } // Hide legend to save space in the card
+                legend: { display: false } // Hide legend to save space
             },
-            cutout: '70%' // Makes it a nice thin ring
+            cutout: '70%' // Makes it a thinner doughnut
         }
     });
 </script>
